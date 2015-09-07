@@ -65,6 +65,9 @@ class BoostLearnTask {
     if (task == "eval") {
       this->TaskEval(); return 0;
     }
+    if (task == "feature") {
+      this->TaskFeature();
+    }
     if (task == "pred") {
       this->TaskPred();
     }
@@ -90,6 +93,7 @@ class BoostLearnTask {
     if (!strcmp("dsplit", name)) data_split = val;
     if (!strcmp("dump_stats", name)) dump_model_stats = atoi(val);
     if (!strcmp("save_pbuffer", name)) save_with_pbuffer = atoi(val);
+    if (!strcmp("max_depth", name)) max_depth = atoi(val);
     if (!strncmp("eval[", name, 5)) {
       char evname[256];
       utils::Assert(sscanf(name, "eval[%[^]]", evname) == 1,
@@ -143,6 +147,8 @@ class BoostLearnTask {
     if (task == "dump") return;
     if (task == "pred") {
       data = io::LoadDataMatrix(test_path.c_str(), silent != 0, use_buffer != 0, loadsplit);
+    } else if (task == "feature") {
+      data = io::LoadDataMatrix("stdin", true, false, false, NULL);
     } else {
       // training
       data = io::LoadDataMatrix(train_path.c_str(),
@@ -256,6 +262,25 @@ class BoostLearnTask {
                    "%s/%04d.model", model_dir_path.c_str(), i + 1);
     this->SaveModel(fname);
   }
+  inline void TaskFeature(void) {
+    std::vector<float> leaf_indices;
+    learner.PredictLeaf(*data, &leaf_indices, NULL, ntree_limit);
+    int num_tree = leaf_indices.size() / data->info.num_row();
+    utils::Check(leaf_indices.size() == num_tree * data->info.num_row(),
+        "leaf_indices: %d, num_data: %d", leaf_indices.size(), data->info.num_row());
+    // utils::Check(leaf_indices.size() == leaf_scores.size(),
+    //     "leaf_indices: %d, leaf_scores: %d", leaf_indices.size(), leaf_scores.size());
+
+    int idx = 0;
+    for (size_t i = 0; i < data->info.num_row(); ++i) {
+      printf("%d | 0:1", static_cast<int>(data->info.labels[i]) * 2 - 1);
+      for (int j = 0; j < num_tree; ++j) {
+        printf(" %d:1", j * ((1 << (max_depth + 1)) - 1) + static_cast<int>(leaf_indices[idx]) + 1);
+        ++idx;
+      }
+      printf("\n");
+    }
+  }
   inline void TaskPred(void) {
     std::vector<float> preds;
     if (!silent) printf("start prediction...\n");
@@ -316,6 +341,8 @@ class BoostLearnTask {
   std::vector<std::string> eval_data_paths;
   /*! \brief the names of the evaluation data used in output log */
   std::vector<std::string> eval_data_names;
+  /*! \brief max depth of a tree */
+  int max_depth;
 
  private:
   io::DataMatrix* data;
