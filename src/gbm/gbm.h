@@ -10,6 +10,7 @@
 #include <vector>
 #include <string>
 #include "../data.h"
+#include "../utils/decision_trees_generated.h"
 #include "../utils/io.h"
 #include "../utils/fmap.h"
 
@@ -126,6 +127,8 @@ class IGradBooster {
    * \return a vector of dump for boosters
    */
   virtual std::vector<std::string> DumpModel(const utils::FeatMap& fmap, int option) = 0;
+
+  virtual void Serialize(flatbuffers::FlatBufferBuilder& fbb) const = 0;
   // destrcutor
   virtual ~IGradBooster(void){}
 };

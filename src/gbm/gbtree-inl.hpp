@@ -203,6 +203,16 @@ class GBTree : public IGradBooster {
     return dump;
   }
 
+  virtual void Serialize(flatbuffers::FlatBufferBuilder& fbb) const {
+    std::vector<flatbuffers::Offset<tree::fbs::Tree>> _trees;
+    _trees.reserve(trees.size());
+    for (const auto& tree: trees) {
+      _trees.emplace_back(tree->Serialize(fbb));
+    }
+    flatbuffers::FlatBufferBuilder _fbb;
+    FinishForestBuffer(fbb, CreateForest(fbb, fbb.CreateVector(_trees)));
+  }
+
  protected:
   // clear the model
   inline void Clear(void) {

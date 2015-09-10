@@ -11,6 +11,9 @@
 #include "./utils/utils.h"
 #include "./utils/config.h"
 #include "./learner/learner-inl.hpp"
+#include "flatbuffers/flatbuffers.h"
+#include "flatbuffers/idl.h"
+#include "flatbuffers/util.h"
 
 namespace xgboost {
 /*!
@@ -62,6 +65,9 @@ class BoostLearnTask {
     if (task == "dump") {
       this->TaskDump(); return 0;
     }
+    if (task == "fbs") {
+      this->TaskFbs(); return 0;
+    }
     if (task == "eval") {
       this->TaskEval(); return 0;
     }
@@ -89,6 +95,8 @@ class BoostLearnTask {
     if (!strcmp("model_dir", name)) model_dir_path = val;
     if (!strcmp("fmap", name)) name_fmap = val;
     if (!strcmp("name_dump", name)) name_dump = val;
+    if (!strcmp("schema_file", name)) schema_file = val;
+    if (!strcmp("name_fbs", name)) name_fbs = val;
     if (!strcmp("name_pred", name)) name_pred = val;
     if (!strcmp("dsplit", name)) data_split = val;
     if (!strcmp("dump_stats", name)) dump_model_stats = atoi(val);
@@ -121,6 +129,8 @@ class BoostLearnTask {
     name_fmap = "NULL";
     name_pred = "pred.txt";
     name_dump = "dump.txt";
+    name_fbs = "fbs.txt";
+    schema_file = "";
     model_dir_path = "./";
     data_split = "NONE";
     load_part = 0;
@@ -145,6 +155,7 @@ class BoostLearnTask {
     bool loadsplit = data_split == "row";
     if (name_fmap != "NULL") fmap.LoadText(name_fmap.c_str());
     if (task == "dump") return;
+    if (task == "fbs") return;
     if (task == "pred") {
       data = io::LoadDataMatrix(test_path.c_str(), silent != 0, use_buffer != 0, loadsplit);
     } else if (task == "feature") {
@@ -252,6 +263,34 @@ class BoostLearnTask {
     }
     fclose(fo);
   }
+  inline void TaskFbs(void) {
+    if (schema_file.empty()) {
+      FILE *fo = utils::FopenCheck(name_fbs.c_str(), "wb");
+      flatbuffers::FlatBufferBuilder fbb;
+      learner.Serialize(fbb);
+      fwrite(fbb.GetBufferPointer(), 1, fbb.GetSize(), fo);
+      fclose(fo);
+      return;
+    }
+    std::string schema;
+    if (!flatbuffers::LoadFile(schema_file.c_str(), false, &schema)) {
+      printf("couldn't load file:%s\n", schema_file.c_str());
+      return;
+    }
+    flatbuffers::Parser parser;
+    if (!parser.Parse(schema.c_str(), nullptr)) {
+      printf("coudln't parse %s\n", schema.c_str());
+      return;
+    }
+
+    learner.Serialize(parser.builder_);
+    std::string json;
+    GenerateText(parser, parser.builder_.GetBufferPointer(), flatbuffers::GeneratorOptions(), &json);
+
+    FILE *fo = utils::FopenCheck(name_fbs.c_str(), "w");
+    fprintf(fo, "%s", json.c_str());
+    fclose(fo);
+  }
   inline void SaveModel(const char *fname) const {
     if (rabit::GetRank() != 0) return;
     learner.SaveModel(fname, save_with_pbuffer != 0);
@@ -337,6 +376,8 @@ class BoostLearnTask {
   std::string name_fmap;
   /*! \brief name of dump file */
   std::string name_dump;
+  std::string name_fbs;
+  std::string schema_file;
   /*! \brief the paths of validation data sets */
   std::vector<std::string> eval_data_paths;
   /*! \brief the names of the evaluation data used in output log */

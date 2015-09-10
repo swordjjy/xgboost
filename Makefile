@@ -15,7 +15,7 @@ endif
 UNAME= $(shell uname)
 
 ifeq ($(UNAME), Linux)
-	LDFLAGS += -lrt
+	LDFLAGS += -lrt -lflatbuffers
 endif
 
 ifeq ($(no_omp),1)
@@ -67,7 +67,7 @@ ifeq ($(OS), Windows_NT)
 	SLIB = wrapper/xgboost_wrapper.dll
 else
 	LIBRABIT = subtree/rabit/lib/librabit.a
-	SLIB = wrapper/libxgboostwrapper.so
+	SLIB = wrapper/libxgboostwrapper.so libxgboost.so
 endif
 
 # java lib
@@ -97,11 +97,13 @@ python: wrapper/libxgboostwrapper.so
 # now the wrapper takes in two files. io and wrapper part
 updater.o: src/tree/updater.cpp  src/tree/*.hpp src/*.h src/tree/*.h src/utils/*.h
 dmlc_simple.o: src/io/dmlc_simple.cpp src/utils/*.h
-gbm.o: src/gbm/gbm.cpp src/gbm/*.hpp src/gbm/*.h
+gbm.o: src/gbm/gbm.cpp src/gbm/*.hpp src/gbm/*.h src/utils/decision_trees_generated.h
 io.o: src/io/io.cpp src/io/*.hpp src/utils/*.h src/learner/dmatrix.h src/*.h
-main.o: src/xgboost_main.cpp src/utils/*.h src/*.h src/learner/*.hpp src/learner/*.h
+main.o: src/xgboost_main.cpp src/utils/*.h src/*.h src/learner/*.hpp src/learner/*.h src/utils/decision_trees_generated.h
 xgboost:  updater.o gbm.o io.o main.o $(LIBRABIT) $(LIBDMLC)
 wrapper/xgboost_wrapper.dll wrapper/libxgboostwrapper.so: wrapper/xgboost_wrapper.cpp src/utils/*.h src/*.h src/learner/*.hpp src/learner/*.h  updater.o gbm.o io.o $(LIBRABIT) $(LIBDMLC)
+libxgboost.so: updater.o gbm.o io.o $(LIBRABIT) $(LIBDMLC)
+src/utils/decision_trees_generated.h: src/utils/decision_trees.fbs
 
 java: java/libxgboostjavawrapper.so
 java/libxgboostjavawrapper.so: java/xgboost4j_wrapper.cpp wrapper/xgboost_wrapper.cpp src/utils/*.h src/*.h src/learner/*.hpp src/learner/*.h  updater.o gbm.o io.o $(LIBRABIT) $(LIBDMLC)
@@ -115,6 +117,9 @@ subtree/rabit/lib/librabit_mock.a: subtree/rabit/src/engine_mock.cc
 	+	cd subtree/rabit;make lib/librabit_mock.a; cd ../..
 subtree/rabit/lib/librabit_mpi.a: subtree/rabit/src/engine_mpi.cc
 	+	cd subtree/rabit;make lib/librabit_mpi.a; cd ../..
+
+src/utils/decision_trees_generated.h:
+	flatc -c -o src/utils/ src/utils/decision_trees.fbs --gen-mutable
 
 $(BIN) :
 	$(CXX) $(CFLAGS) -fPIC -o $@ $(filter %.cpp %.o %.c %.cc %.a, $^) $(LDFLAGS)

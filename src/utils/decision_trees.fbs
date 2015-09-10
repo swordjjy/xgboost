@@ -1,0 +1,19 @@
+namespace xgboost.tree.fbs;
+
+struct Node {
+  feature_id: int = -1;  // -1 iff. it's a leaf
+  value: float;  // value is the score for a leaf, and condition for a non-leaf
+  left_child_index: int = 0;  // the right_child_index === left_child_index + 1
+  // TODO: use leftmost bit of left_child_index for default_left_child
+  default_left_child: bool = true;  // whether taking left child when the feature is missing
+}
+
+table Tree {
+  nodes: [Node];
+}
+
+table Forest {
+  trees: [Tree];
+}
+
+root_type Forest;

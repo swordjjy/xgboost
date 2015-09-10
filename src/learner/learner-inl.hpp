@@ -401,6 +401,10 @@ class BoostLearner : public rabit::Serializable {
     return gbm_->DumpModel(fmap, option);
   }
 
+  inline void Serialize(flatbuffers::FlatBufferBuilder& fbb) const {
+    return gbm_->Serialize(fbb);
+  }
+
  protected:
   /*!
    * \brief initialize the objective function and GBM,

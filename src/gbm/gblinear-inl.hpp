@@ -155,6 +155,11 @@ class GBLinear : public IGradBooster {
                            unsigned ntree_limit = 0) {
     utils::Error("gblinear does not support predict leaf index");
   }
+
+  virtual void Serialize(flatbuffers::FlatBufferBuilder& fbb) const {
+    utils::Error("gblinear does not support serialize");
+  }
+
   virtual std::vector<std::string> DumpModel(const utils::FeatMap& fmap, int option) {
     std::stringstream fo("");
     fo << "bias:\n";
