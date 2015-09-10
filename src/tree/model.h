@@ -403,28 +403,18 @@ class TreeModel {
   }
 
   inline flatbuffers::Offset<fbs::Tree> Serialize(flatbuffers::FlatBufferBuilder& fbb) const {
-    std::vector<fbs::Node> _nodes(1, fbs::Node(-1, 0, 0, true));
-    Serialize(nodes[0], _nodes, 0);
+    std::vector<fbs::Node> _nodes;
+    _nodes.reserve(nodes.size());
+    for (const auto& node: nodes) {
+      _nodes.emplace_back(fbs::Node(node.is_leaf()? -1: node.split_index(),
+            node.is_leaf()? node.leaf_value(): node.split_cond(),
+            node.cleft(),
+            node.default_left()));
+    }
     return CreateTree(fbb, fbb.CreateVectorOfStructs(_nodes));
   }
 
  private:
-  void Serialize(const Node& current, std::vector<fbs::Node>& _nodes, int idx) const {
-    if (current.is_leaf()) {
-      _nodes[idx].mutate_value(current.leaf_value());
-      return;
-    }
-    const auto left_child = _nodes.size();
-    _nodes.resize(_nodes.size() + 2, fbs::Node(-1, 0, 0, true));
-    auto& node = _nodes[idx];
-    node.mutate_feature_id(current.split_index());
-    node.mutate_value(current.split_cond());
-    node.mutate_left_child_index(left_child);
-    node.mutate_default_left_child(current.default_left());
-    Serialize(nodes[current.cleft()], _nodes, left_child);
-    Serialize(nodes[current.cright()], _nodes, left_child + 1);
-  }
-
   void Dump(int nid, std::stringstream &fo, // NOLINT(*)
             const utils::FeatMap& fmap, int depth, bool with_stats) {
     for (int i = 0;  i < depth; ++i) {
