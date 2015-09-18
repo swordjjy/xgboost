@@ -1,0 +1,42 @@
+[
+{
+  "directory": "/home/byzhang/src/xgboost/build",
+  "command": "g++ -c -Wall -O3 -msse2  -Wno-unknown-pragmas -funroll-loops -fopenmp -std=c++11 -fPIC -o updater.o src/tree/updater.cpp",
+  "file": "/home/byzhang/src/xgboost/src/tree/updater.cpp"
+},
+{
+  "directory": "/home/byzhang/src/xgboost/build",
+  "command": "g++ -c -Wall -O3 -msse2  -Wno-unknown-pragmas -funroll-loops -fopenmp -std=c++11 -fPIC -o gbm.o src/gbm/gbm.cpp",
+  "file": "/home/byzhang/src/xgboost/src/gbm/gbm.cpp"
+},
+{
+  "directory": "/home/byzhang/src/xgboost/build",
+  "command": "g++ -c -Wall -O3 -msse2  -Wno-unknown-pragmas -funroll-loops -fopenmp -std=c++11 -fPIC -o io.o src/io/io.cpp",
+  "file": "/home/byzhang/src/xgboost/src/io/io.cpp"
+},
+{
+  "directory": "/home/byzhang/src/xgboost/build",
+  "command": "g++ -c -Wall -O3 -msse2  -Wno-unknown-pragmas -funroll-loops -fopenmp -std=c++11 -fPIC -o main.o src/xgboost_main.cpp",
+  "file": "/home/byzhang/src/xgboost/src/xgboost_main.cpp"
+},
+{
+  "directory": "/home/byzhang/src/xgboost/build",
+  "command": "g++ -c -O3 -msse2 -fPIC -Wall -Wextra -Wno-unused-parameter -Wno-unknown-pragmas -pedantic   -o allreduce_base.o subtree/rabit/src/allreduce_base.cc",
+  "file": "/home/byzhang/src/xgboost/subtree/rabit/src/allreduce_base.cc"
+},
+{
+  "directory": "/home/byzhang/src/xgboost/build",
+  "command": "g++ -c -O3 -msse2 -fPIC -Wall -Wextra -Wno-unused-parameter -Wno-unknown-pragmas -pedantic   -o allreduce_robust.o subtree/rabit/src/allreduce_robust.cc",
+  "file": "/home/byzhang/src/xgboost/subtree/rabit/src/allreduce_robust.cc"
+},
+{
+  "directory": "/home/byzhang/src/xgboost/build",
+  "command": "g++ -c -O3 -msse2 -fPIC -Wall -Wextra -Wno-unused-parameter -Wno-unknown-pragmas -pedantic   -o engine.o subtree/rabit/src/engine.cc",
+  "file": "/home/byzhang/src/xgboost/subtree/rabit/src/engine.cc"
+},
+{
+  "directory": "/home/byzhang/src/xgboost/build",
+  "command": "g++ -c -Wall -O3 -msse2  -Wno-unknown-pragmas -funroll-loops -fopenmp -std=c++11 -fPIC -o dmlc_simple.o src/io/dmlc_simple.cpp",
+  "file": "/home/byzhang/src/xgboost/src/io/dmlc_simple.cpp"
+}
+]

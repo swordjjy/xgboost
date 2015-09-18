@@ -8,6 +8,7 @@
 #include <vector>
 #include "./sync/sync.h"
 #include "./io/io.h"
+#include "./io/simple_dmatrix-inl.hpp"
 #include "./utils/utils.h"
 #include "./utils/config.h"
 #include "./learner/learner-inl.hpp"
@@ -302,23 +303,45 @@ class BoostLearnTask {
     this->SaveModel(fname);
   }
   inline void TaskFeature(void) {
+    // std::vector<float> leaf_indices;
+    // learner.PredictLeaf(*data, &leaf_indices, NULL, ntree_limit);
+    // int num_tree = leaf_indices.size() / data->info.num_row();
+    // utils::Check(leaf_indices.size() == num_tree * data->info.num_row(),
+    //     "leaf_indices: %d, num_data: %d", leaf_indices.size(), data->info.num_row());
+    //
+    // int idx = 0;
+    // for (size_t i = 0; i < data->info.num_row(); ++i) {
+    //   printf("%d | 0:1", static_cast<int>(data->info.labels[i]) * 2 - 1);
+    //   for (int j = 0; j < num_tree; ++j) {
+    //     printf(" %d:1", j * ((1 << (max_depth + 1)) - 1) + static_cast<int>(leaf_indices[idx]) + 1);
+    //     ++idx;
+    //   }
+    //   printf("\n");
+    // }
     std::vector<float> leaf_indices;
-    learner.PredictLeaf(*data, &leaf_indices, NULL, ntree_limit);
-    int num_tree = leaf_indices.size() / data->info.num_row();
-    utils::Check(leaf_indices.size() == num_tree * data->info.num_row(),
-        "leaf_indices: %d, num_data: %d", leaf_indices.size(), data->info.num_row());
-    // utils::Check(leaf_indices.size() == leaf_scores.size(),
-    //     "leaf_indices: %d, leaf_scores: %d", leaf_indices.size(), leaf_scores.size());
-
-    int idx = 0;
-    for (size_t i = 0; i < data->info.num_row(); ++i) {
-      printf("%d | 0:1", static_cast<int>(data->info.labels[i]) * 2 - 1);
-      for (int j = 0; j < num_tree; ++j) {
-        printf(" %d:1", j * ((1 << (max_depth + 1)) - 1) + static_cast<int>(leaf_indices[idx]) + 1);
-        ++idx;
+    io::DMatrixSimple dmat;
+    auto* it = data->fmat()->RowIterator();
+    it->BeforeFirst();
+    while (it->Next()) {
+      const auto& batch = it->Value();
+      for (size_t i = 0; i < batch.size; ) {
+        dmat.Clear();
+        size_t k = std::min(i + 64, batch.size);
+        for (; i < k; ++i) {
+          std::vector<RowBatch::Entry> feats(batch[i].data, batch[i].data + batch[i].length);
+          dmat.AddRow(feats);
+        }
+        // row_index in dmat is always 0, so multi-task learning is not supported.
+        learner.PredictLeaf(dmat, &leaf_indices, NULL, ntree_limit);
+        // assume data is OneBatch, otherwise need to track i.
+        printf("%d | 0:1", static_cast<int>(data->info.labels[i]) * 2 - 1);
+        for (size_t j = 0; j < leaf_indices.size(); ++j) {
+          printf(" %lu:1", j * ((1 << (max_depth + 1)) - 1) + static_cast<int>(leaf_indices[j]) + 1);
+        }
+        printf("\n");
       }
-      printf("\n");
     }
+
   }
   inline void TaskPred(void) {
     std::vector<float> preds;
