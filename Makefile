@@ -76,7 +76,7 @@ JLIB = java/libxgboostjavawrapper.so
 # specify tensor path
 BIN = xgboost
 MOCKBIN = xgboost.mock
-OBJ = updater.o gbm.o io.o main.o dmlc_simple.o
+OBJ = updater.o gbm.o io.o main.o dmlc_simple.o fileSplitter.o
 MPIBIN =
 ifeq ($(WITH_FPIC), 1)
 	TARGET = $(BIN) $(OBJ) $(SLIB)
@@ -98,9 +98,10 @@ python: wrapper/libxgboostwrapper.so
 updater.o: src/tree/updater.cpp  src/tree/*.hpp src/*.h src/tree/*.h src/utils/*.h
 dmlc_simple.o: src/io/dmlc_simple.cpp src/utils/*.h
 gbm.o: src/gbm/gbm.cpp src/gbm/*.hpp src/gbm/*.h src/utils/decision_trees_generated.h
+fileSplitter.o: src/fileSplitter/fileSplitter.cpp src/fileSplitter/fileSplitter.hpp
 io.o: src/io/io.cpp src/io/*.hpp src/utils/*.h src/learner/dmatrix.h src/*.h
 main.o: src/xgboost_main.cpp src/utils/*.h src/*.h src/learner/*.hpp src/learner/*.h src/utils/decision_trees_generated.h
-xgboost:  updater.o gbm.o io.o main.o $(LIBRABIT) $(LIBDMLC)
+xgboost:  updater.o gbm.o io.o main.o fileSplitter.o $(LIBRABIT) $(LIBDMLC)
 wrapper/xgboost_wrapper.dll wrapper/libxgboostwrapper.so: wrapper/xgboost_wrapper.cpp src/utils/*.h src/*.h src/learner/*.hpp src/learner/*.h  updater.o gbm.o io.o $(LIBRABIT) $(LIBDMLC)
 libxgboost.so: updater.o gbm.o io.o $(LIBRABIT) $(LIBDMLC)
 src/utils/decision_trees_generated.h: src/utils/decision_trees.fbs

@@ -14,7 +14,8 @@
 #include <algorithm>
 #include "./gbm.h"
 #include "../tree/updater.h"
-
+#include <iostream>
+using namespace std;
 namespace xgboost {
 namespace gbm {
 /*!
@@ -208,11 +209,13 @@ class GBLinear : public IGradBooster {
     inline void SetParam(const char *name, const char *val) {
       using namespace std;
       // sync-names
+          cout<<"gblinear setparam2"<<endl;
       if (!strcmp("eta", name)) learning_rate = static_cast<float>(atof(val));
       if (!strcmp("lambda", name)) reg_lambda = static_cast<float>(atof(val));
       if (!strcmp( "alpha", name)) reg_alpha = static_cast<float>(atof(val));
       if (!strcmp( "lambda_bias", name)) reg_lambda_bias = static_cast<float>(atof(val));
       // real names
+          cout<<"gblinear setparam3"<<endl;
       if (!strcmp( "learning_rate", name)) learning_rate = static_cast<float>(atof(val));
       if (!strcmp( "reg_lambda", name)) reg_lambda = static_cast<float>(atof(val));
       if (!strcmp( "reg_alpha", name)) reg_alpha = static_cast<float>(atof(val));

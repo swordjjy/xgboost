@@ -17,7 +17,8 @@
 #include "./objective.h"
 #include "./evaluation.h"
 #include "../gbm/gbm.h"
-
+#include <iostream>
+using namespace std;
 namespace xgboost {
 /*! \brief namespace for learning algorithm */
 namespace learner {
@@ -54,7 +55,9 @@ class BoostLearner : public rabit::Serializable {
    * \param mats array of pointers to matrix whose prediction result need to be cached
    */
   inline void SetCacheData(const std::vector<DMatrix*>& mats) {
-    utils::Assert(cache_.size() == 0, "can only call cache data once");
+    //utils::Assert(cache_.size() == 0, "can only call cache data once");
+    if(cache_.size() !=0)
+	cache_.clear();
     // assign buffer index
     size_t buffer_size = 0;
     for (size_t i = 0; i < mats.size(); ++i) {
@@ -184,10 +187,13 @@ class BoostLearner : public rabit::Serializable {
     }
     utils::Check(fi.Read(&name_gbm_), "BoostLearner: wrong model format");
     // delete existing gbm if any
-    if (obj_ != NULL) delete obj_;
-    if (gbm_ != NULL) delete gbm_;
+    if (obj_ != NULL) {delete obj_;obj_ = NULL;}
+    if (gbm_ != NULL) {delete gbm_;gbm_ = NULL;}
+    cout<<"learner1"<<endl;
     this->InitTrainer(calc_num_feature);
+    cout<<"learner2"<<endl;
     this->InitObjGBM();
+    cout<<"learner3"<<endl;
     char tmp[32];
     utils::SPrintf(tmp, sizeof(tmp), "%u", mparam.num_class);
     obj_->SetParam("num_class", tmp);
@@ -195,6 +201,7 @@ class BoostLearner : public rabit::Serializable {
     if (mparam.saved_with_pbuffer == 0) {
       gbm_->ResetPredBuffer(pred_buffer_size);
     }
+cout<<"learner4"<<endl;
   }
   // rabit load model from rabit checkpoint
   virtual void Load(rabit::Stream *fi) {
@@ -313,10 +320,15 @@ class BoostLearner : public rabit::Serializable {
     char tmp[256];
     utils::SPrintf(tmp, sizeof(tmp), "[%d]", iter);
     res = tmp;
+    cout<<"evals.size():"<<evals.size()<<endl;
     for (size_t i = 0; i < evals.size(); ++i) {
+      cout<<"before PredictRaw"<<endl;
       this->PredictRaw(*evals[i], &preds_);
+	cout<<"after PredictRaw"<<endl;
       obj_->EvalTransform(&preds_);
+	cout<<"after evaltransform"<<endl;
       res += evaluator_.Eval(evname[i].c_str(), preds_, evals[i]->info, distributed_mode == 2);
+	cout<<"after evaluator"<<endl;
     }
     return res;
   }

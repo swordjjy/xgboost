@@ -14,7 +14,8 @@
 #include "./gbm.h"
 #include "../utils/omp.h"
 #include "../tree/updater.h"
-
+#include <iostream>
+using namespace std;
 namespace xgboost {
 namespace gbm {
 /*!
@@ -67,6 +68,7 @@ class GBTree : public IGradBooster {
   }
   virtual void SaveModel(utils::IStream &fo, bool with_pbuffer) const { // NOLINT(*)
     utils::Assert(mparam.num_trees == static_cast<int>(trees.size()), "GBTree");
+    utils::Printf("mparams are: %s", mparam.toString().c_str());
     if (with_pbuffer) {
       fo.Write(&mparam, sizeof(ModelParam));
     } else {
@@ -484,7 +486,14 @@ class GBTree : public IGradBooster {
       num_pbuffer = 0;
       num_output_group = 1;
       size_leaf_vector = 0;
-    }
+     }
+      std::string toString() const{
+         std::string params = "num_trees: "+ std::to_string(num_trees)+"num_roots: "+std::to_string(num_roots)
+                        +"num_pbuffer: "+std::to_string(num_pbuffer)+"num_pbuffer: "+std::to_string(num_pbuffer)
+                        +"num_output_group: "+std::to_string(num_output_group)
+			+"size_leaf_vector: "+std::to_string(size_leaf_vector);
+        return params;
+     }
     /*!
      * \brief set parameters from outside
      * \param name name of the parameter
