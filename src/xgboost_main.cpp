@@ -63,7 +63,7 @@ class BoostLearnTask {
 		for(vector<string>::const_iterator it = partitionNames.begin(); it != partitionNames.end(); ++it) {
 			cout<<"modelName"<<modelName<<endl;
 			cout<<"here1";
-			model_in = "model.partition00";
+			///model_in = "model.partition00";
 			if(modelName.compare("") != 0) {
 				cout<<"modelName"<<modelName<<endl;
 				cout<<"model_in"<<model_in<<endl;
