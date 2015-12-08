@@ -23,24 +23,26 @@ using namespace std;
 
 class fileSplitter
 {
-    char * buffer = NULL;
-    int bufferSize;
-    //int splits;
-    size_t * splitSizes = NULL;
-    char inputFile[256];
-    int splitDigitLen;
-    int splitCount;
-    size_t memSize;
-    map<char,bool> & delimiters;
-    vector<string> partitionNames;
+  ////char * buffer = NULL;
+  char * buffer;
+  int bufferSize;
+  //int splits;
+  ////size_t * splitSizes = NULL;
+  size_t * splitSizes;
+  char inputFile[256];
+  int splitDigitLen;
+  int splitCount;
+  size_t memSize;
+  map<char,bool> & delimiters;
+  vector<string> partitionNames;
 public:
-    fileSplitter(const char* inputFile, int bufferSize, size_t memSize, map<char,bool> & delimiters);
-    ~fileSplitter();
-    bool splitfile();
-    void createPartition(ifstream & is, int index);
-    bool prepareSplit(size_t inputFileSize);
-    int getSplitDigitLen() const;
-    const vector<string> & getpartitionNames() const;
+  fileSplitter(const char* inputFile, int bufferSize, size_t memSize, map<char,bool> & delimiters);
+  ~fileSplitter();
+  bool splitfile();
+  void createPartition(ifstream & is, int index);
+  bool prepareSplit(size_t inputFileSize);
+  int getSplitDigitLen() const;
+  const vector<string> & getpartitionNames() const;
 };
 
 

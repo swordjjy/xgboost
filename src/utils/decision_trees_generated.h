@@ -3,7 +3,7 @@
 #ifndef FLATBUFFERS_GENERATED_DECISIONTREES_XGBOOST_TREE_FBS_H_
 #define FLATBUFFERS_GENERATED_DECISIONTREES_XGBOOST_TREE_FBS_H_
 
-#include "flatbuffers/flatbuffers.h"
+#include "../flatbuffers/flatbuffers.h"
 
 
 namespace xgboost {

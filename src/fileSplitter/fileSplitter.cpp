@@ -9,7 +9,7 @@
 #include "fileSplitter.hpp"
 #include <stdlib.h>
 fileSplitter::fileSplitter(const char * inputFileName, int bufferSize, size_t memSize,
-                           map<char,bool> & delimiters): bufferSize(bufferSize), memSize(memSize), delimiters(delimiters)
+                           map<char,bool> & delimiters): bufferSize(bufferSize), memSize(memSize), delimiters(delimiters), buffer(NULL), splitSizes(NULL)
 {
     strcpy(inputFile, inputFileName);
     
@@ -98,7 +98,8 @@ void fileSplitter::createPartition(ifstream & is, int index){
         indexDigitLen++;
     } 
     //cout << partitionFileName << index <<  endl;
-    partitionFileName += to_string(index);
+    ////partitionFileName += to_string(index);
+    partitionFileName += to_string((_Longlong)index);
     cout << partitionFileName << endl;
     ofstream os(partitionFileName);
     if(!os){
